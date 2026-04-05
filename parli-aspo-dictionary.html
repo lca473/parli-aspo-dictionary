@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Parli Aspo Dictionary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0F1A1F;
+  --bg2: #162229;
+  --card: #1C2F38;
+  --card-hover: #22394A;
+  --green: #58CC02;
+  --green-dark: #46A302;
+  --green-glow: rgba(88,204,2,0.18);
+  --red: #FF4B4B;
+  --gold: #FFC800;
+  --gold-glow: rgba(255,200,0,0.15);
+  --blue: #1CB0F6;
+  --blue-glow: rgba(28,176,246,0.12);
+  --purple: #CE82FF;
+  --purple-glow: rgba(206,130,255,0.12);
+  --text: #FFFFFF;
+  --dim: #7A99A8;
+  --mid: #A3BCC9;
+  --border: #263A45;
+  --input: #0B151B;
+  --radius: 16px;
+  --font: 'Nunito', system-ui, sans-serif;
+  --display: 'Baloo 2', 'Nunito', system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { background: var(--bg); }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes pulseGlow { 0%,100% { box-shadow: 0 0 20px var(--green-glow); } 50% { box-shadow: 0 0 40px var(--green-glow), 0 0 60px rgba(88,204,2,0.08); } }
+@keyframes slideResult { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Header */
+.header {
+  padding: 16px 20px;
+  border-bottom: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 100;
+}
+.header-icon { font-size: 26px; animation: float 3s ease-in-out infinite; }
+.header-title { font-family: var(--display); color: var(--green); font-weight: 800; font-size: 22px; }
+.header-sub { color: var(--dim); font-size: 13px; font-weight: 600; margin-left: 4px; }
+
+/* Main */
+.main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px 60px;
+}
+
+/* Translator panels */
+.panel {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.panel:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 0 24px var(--green-glow);
+}
+.panel.pa-panel:focus-within {
+  border-color: var(--blue);
+  box-shadow: 0 0 24px var(--blue-glow);
+}
+
+.panel-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.panel-flag {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.flag-en { background: rgba(28,176,246,0.15); border: 1.5px solid var(--blue); color: var(--blue); }
+.flag-pa { background: var(--green-glow); border: 1.5px solid var(--green); color: var(--green); }
+.panel-lang { font-size: 15px; font-weight: 800; color: var(--mid); }
+
+.search-input {
+  width: 100%;
+  padding: 14px 16px;
+  padding-right: 44px;
+  background: var(--input);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 17px;
+  font-weight: 700;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input::placeholder { color: var(--dim); font-weight: 600; }
+.search-input:focus { border-color: var(--green); }
+.pa-panel .search-input:focus { border-color: var(--blue); }
+
+.input-wrap {
+  position: relative;
+}
+.clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--border);
+  border: none;
+  color: var(--dim);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  font-family: var(--font);
+}
+.clear-btn.visible { display: flex; }
+.clear-btn:hover { background: var(--card-hover); color: var(--text); }
+
+/* Results */
+.results {
+  margin-top: 14px;
+}
+
+.result-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg2);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  animation: slideResult 0.25s ease-out both;
+  transition: border-color 0.15s, background 0.15s;
+  cursor: default;
+}
+.result-item:hover {
+  border-color: rgba(255,255,255,0.1);
+  background: var(--card-hover);
+}
+
+.result-word {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.3;
+}
+.result-translation {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dim);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.result-pos {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--purple);
+  background: var(--purple-glow);
+  border: 1px solid rgba(206,130,255,0.25);
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.result-note {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--blue);
+  font-style: italic;
+  margin-top: 3px;
+}
+
+.result-arrow {
+  color: var(--green);
+  font-size: 18px;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 2px;
+  opacity: 0.6;
+}
+.pa-panel .result-arrow { color: var(--blue); }
+
+.no-results {
+  text-align: center;
+  padding: 20px;
+  color: var(--dim);
+  font-size: 14px;
+  font-weight: 600;
+}
+.no-results-icon { font-size: 28px; margin-bottom: 8px; }
+
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 4px 0;
+  color: var(--dim);
+}
+.divider-line { flex: 1; height: 1px; background: var(--border); }
+.divider-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  background: rgba(255,200,0,0.08);
+  border: 1.5px solid rgba(255,200,0,0.25);
+  color: var(--gold);
+}
+.stat-chip.blue {
+  background: var(--blue-glow);
+  border-color: rgba(28,176,246,0.25);
+  color: var(--blue);
+}
+.stat-chip.green {
+  background: var(--green-glow);
+  border-color: rgba(88,204,2,0.25);
+  color: var(--green);
+}
+
+/* Browse section */
+.browse-section {
+  margin-top: 28px;
+}
+.browse-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--mid);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.letter-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.letter-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  color: var(--mid);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font);
+}
+.letter-btn:hover { background: var(--card-hover); color: var(--text); }
+.letter-btn.active {
+  background: var(--green-glow);
+  border-color: var(--green);
+  color: var(--green);
+}
+.letter-btn.disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.browse-results {
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.browse-results::-webkit-scrollbar { width: 5px; }
+.browse-results::-webkit-scrollbar-track { background: transparent; }
+.browse-results::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* Grammar tip */
+.grammar-tip {
+  background: linear-gradient(135deg, rgba(88,204,2,0.06), rgba(28,176,246,0.06));
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-top: 20px;
+}
+.grammar-tip-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--green);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.grammar-tip-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--mid);
+  line-height: 1.6;
+}
+.grammar-tip-text strong { color: var(--text); }
+
+/* Result count */
+.result-count {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dim);
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .main { padding: 14px 12px 60px; }
+  .panel { padding: 16px; }
+  .search-input { font-size: 16px; padding: 12px 14px; padding-right: 40px; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-icon">📖</span>
+  <span class="header-title">Parli Aspo</span>
+  <span class="header-sub">Dictionary</span>
+</div>
+
+<div class="main" id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// COMPLETE DICTIONARY DATA
+// ═══════════════════════════════════════════════════════════════
+const DICT = [
+  {pa:"abelo",en:"bee",pos:"noun"},
+  {pa:"abra",en:"open",pos:"adj"},
+  {pa:"abri",en:"open",pos:"verb"},
+  {pa:"ada",en:"more",pos:"adj"},
+  {pa:"adapti",en:"fit",pos:"verb"},
+  {pa:"agwa",en:"wet",pos:"adj"},
+  {pa:"agwi",en:"drink",pos:"verb"},
+  {pa:"agwo",en:"water",pos:"noun"},
+  {pa:"alkolo",en:"alcohol",pos:"noun"},
+  {pa:"alsotu",en:"also",pos:"adv"},
+  {pa:"alta",en:"tall / high / up",pos:"adj"},
+  {pa:"alti",en:"raise / increase",pos:"verb"},
+  {pa:"am",en:"here",pos:"adv"},
+  {pa:"amabla",en:"kind / kindly",pos:"adj"},
+  {pa:"ami",en:"love",pos:"verb"},
+  {pa:"amo",en:"love",pos:"noun"},
+  {pa:"anka",en:"still",pos:"adv"},
+  {pa:"ano",en:"year",pos:"noun"},
+  {pa:"arano",en:"spider",pos:"noun"},
+  {pa:"arbo",en:"tree",pos:"noun"},
+  {pa:"aro",en:"air",pos:"noun"},
+  {pa:"arti",en:"make art",pos:"verb"},
+  {pa:"artio",en:"artist",pos:"noun"},
+  {pa:"arto",en:"art",pos:"noun"},
+  {pa:"asawi",en:"marry",pos:"verb"},
+  {pa:"asawo",en:"spouse / husband / wife",pos:"noun"},
+  {pa:"aspa",en:"hopeful / hopefully",pos:"adj"},
+  {pa:"aspi",en:"hope / expect",pos:"verb"},
+  {pa:"aspo",en:"hope",pos:"noun"},
+  {pa:"audo",en:"sound",pos:"noun"},
+  {pa:"autuno",en:"autumn",pos:"noun"},
+  {pa:"avanta",en:"forward / advantageous",pos:"adj"},
+  {pa:"avanti",en:"move forward",pos:"verb"},
+  {pa:"avanto",en:"advantage",pos:"noun"},
+  {pa:"aviono",en:"airplane",pos:"noun"},
+  {pa:"balda",en:"soon",pos:"adv"},
+  {pa:"bani",en:"use the bathroom",pos:"verb"},
+  {pa:"bano",en:"bathroom",pos:"noun"},
+  {pa:"bebo",en:"baby",pos:"noun"},
+  {pa:"bela",en:"beautiful / beautifully",pos:"adj"},
+  {pa:"bem",en:"well (interjection)",pos:"intj"},
+  {pa:"bigo",en:"building",pos:"noun"},
+  {pa:"bigi",en:"build",pos:"verb"},
+  {pa:"bigio",en:"builder",pos:"noun"},
+  {pa:"biklio",en:"cyclist",pos:"noun"},
+  {pa:"biklo",en:"bicycle",pos:"noun"},
+  {pa:"blanka",en:"white",pos:"adj"},
+  {pa:"blua",en:"blue",pos:"adj"},
+  {pa:"bona",en:"good / correct / well",pos:"adj"},
+  {pa:"bonapova",en:"lucky",pos:"adj"},
+  {pa:"bonapovo",en:"luck",pos:"noun"},
+  {pa:"boti",en:"operate a boat",pos:"verb"},
+  {pa:"botio",en:"boat captain",pos:"noun"},
+  {pa:"boto",en:"boat",pos:"noun"},
+  {pa:"bovo",en:"cow",pos:"noun"},
+  {pa:"brako",en:"arm",pos:"noun"},
+  {pa:"braki",en:"reach",pos:"verb"},
+  {pa:"brava",en:"brave",pos:"adj"},
+  {pa:"bravi",en:"act bravely",pos:"verb"},
+  {pa:"bravo",en:"bravery",pos:"noun"},
+  {pa:"bruna",en:"brown",pos:"adj"},
+  {pa:"buko",en:"mouth",pos:"noun"},
+  {pa:"buski",en:"search",pos:"verb"},
+  {pa:"buso",en:"bus",pos:"noun"},
+  {pa:"da",en:"yes",pos:"particle"},
+  {pa:"dansi",en:"dance",pos:"verb"},
+  {pa:"danso",en:"dance",pos:"noun"},
+  {pa:"de",en:"of",pos:"prep"},
+  {pa:"debi",en:"should",pos:"verb"},
+  {pa:"deka",en:"ten",pos:"num"},
+  {pa:"dekadualuno",en:"December",pos:"noun"},
+  {pa:"dekaunaluno",en:"November",pos:"noun"},
+  {pa:"dekaluno",en:"October",pos:"noun"},
+  {pa:"dena",en:"rich",pos:"adj"},
+  {pa:"deni",en:"buy",pos:"verb"},
+  {pa:"denio",en:"buyer",pos:"noun"},
+  {pa:"deno",en:"money",pos:"noun"},
+  {pa:"denti",en:"bite",pos:"verb"},
+  {pa:"dentio",en:"dentist",pos:"noun"},
+  {pa:"dento",en:"tooth",pos:"noun"},
+  {pa:"dentopuro",en:"toothbrush",pos:"noun",note:"dento + puro"},
+  {pa:"dilemo",en:"problem",pos:"noun"},
+  {pa:"dipa",en:"deep",pos:"adj"},
+  {pa:"dipla",en:"used",pos:"adj"},
+  {pa:"dipli",en:"use",pos:"verb"},
+  {pa:"doktio",en:"doctor",pos:"noun"},
+  {pa:"dola",en:"painful",pos:"adj"},
+  {pa:"doli",en:"hurt",pos:"verb"},
+  {pa:"domo",en:"room",pos:"noun"},
+  {pa:"doni",en:"give",pos:"verb"},
+  {pa:"dono",en:"gift",pos:"noun"},
+  {pa:"dorma",en:"sleepy / tiredly / sleepily",pos:"adj"},
+  {pa:"dormi",en:"sleep",pos:"verb"},
+  {pa:"dormo",en:"sleep",pos:"noun"},
+  {pa:"drogo",en:"drug",pos:"noun"},
+  {pa:"dua",en:"two",pos:"num"},
+  {pa:"dualuno",en:"February",pos:"noun"},
+  {pa:"duayo",en:"Monday",pos:"noun"},
+  {pa:"dura",en:"hard",pos:"adj"},
+  {pa:"duramalabro",en:"lock",pos:"noun",note:"dura + malabro"},
+  {pa:"durel",en:"during / while",pos:"conj"},
+  {pa:"dureli",en:"continue / endure / last",pos:"verb"},
+  {pa:"elefano",en:"elephant",pos:"noun"},
+  {pa:"eleki",en:"choose",pos:"verb"},
+  {pa:"eleko",en:"choice",pos:"noun"},
+  {pa:"elori",en:"having the urge to squeeze something cute",pos:"verb"},
+  {pa:"en",en:"in",pos:"prep"},
+  {pa:"esi",en:"be / is / am",pos:"verb"},
+  {pa:"eso",en:"thing",pos:"noun"},
+  {pa:"espliki",en:"explain",pos:"verb"},
+  {pa:"espliko",en:"explanation",pos:"noun"},
+  {pa:"evali",en:"test",pos:"verb"},
+  {pa:"evalo",en:"exam / test",pos:"noun"},
+  {pa:"famila",en:"family",pos:"adj"},
+  {pa:"familo",en:"family",pos:"noun"},
+  {pa:"faram",en:"there",pos:"adv"},
+  {pa:"fari",en:"do / make",pos:"verb"},
+  {pa:"farlan",en:"that / those",pos:"dem"},
+  {pa:"fasila",en:"easy / easily",pos:"adj"},
+  {pa:"fasa",en:"front",pos:"adj"},
+  {pa:"fasi",en:"face",pos:"verb"},
+  {pa:"faso",en:"face",pos:"noun"},
+  {pa:"febro",en:"fever",pos:"noun"},
+  {pa:"feli",en:"feel",pos:"verb"},
+  {pa:"felibona",en:"comfortable",pos:"adj"},
+  {pa:"feliboni",en:"comfort",pos:"verb"},
+  {pa:"felibono",en:"comfort",pos:"noun"},
+  {pa:"felifasi",en:"smile",pos:"verb",note:"feli + fasi"},
+  {pa:"felifaso",en:"smile",pos:"noun",note:"feli + faso"},
+  {pa:"felisa",en:"happy",pos:"adj"},
+  {pa:"feliso",en:"happiness",pos:"noun"},
+  {pa:"felo",en:"feeling",pos:"noun"},
+  {pa:"femo",en:"woman",pos:"noun"},
+  {pa:"feno",en:"window",pos:"noun"},
+  {pa:"feto",en:"feature / trait / characteristic",pos:"noun"},
+  {pa:"fika",en:"fixed",pos:"adj"},
+  {pa:"fiki",en:"repair",pos:"verb"},
+  {pa:"fikio",en:"repairman",pos:"noun"},
+  {pa:"fili",en:"enjoy / like",pos:"verb"},
+  {pa:"filmido",en:"show (TV show)",pos:"noun",note:"filmo + -ido"},
+  {pa:"filmo",en:"movie",pos:"noun"},
+  {pa:"fina",en:"last / end",pos:"adj"},
+  {pa:"fingo",en:"finger",pos:"noun"},
+  {pa:"fini",en:"finish",pos:"verb"},
+  {pa:"fino",en:"end / last",pos:"noun"},
+  {pa:"filo",en:"friend",pos:"noun"},
+  {pa:"flora",en:"floral",pos:"adj"},
+  {pa:"floro",en:"flower",pos:"noun"},
+  {pa:"fogo",en:"fire",pos:"noun"},
+  {pa:"fogida",en:"burnt",pos:"adj"},
+  {pa:"fogidi",en:"burn",pos:"verb"},
+  {pa:"fogido",en:"flame",pos:"noun",note:"fogo + -ido"},
+  {pa:"fogidido",en:"spark",pos:"noun",note:"fogido + -ido"},
+  {pa:"foli",en:"fly",pos:"verb"},
+  {pa:"for",en:"for",pos:"prep"},
+  {pa:"for ke",en:"so that",pos:"conj"},
+  {pa:"forke",en:"because",pos:"conj"},
+  {pa:"formiko",en:"ant",pos:"noun"},
+  {pa:"foro",en:"forest",pos:"noun"},
+  {pa:"forta",en:"strong / strongly",pos:"adj"},
+  {pa:"foti",en:"take a photo",pos:"verb"},
+  {pa:"fotio",en:"photographer",pos:"noun"},
+  {pa:"foto",en:"picture / photo",pos:"noun"},
+  {pa:"frato",en:"brother",pos:"noun"},
+  {pa:"frigi",en:"cool",pos:"verb"},
+  {pa:"friga",en:"cold",pos:"adj"},
+  {pa:"frigo",en:"refrigerator",pos:"noun"},
+  {pa:"fruko",en:"fruit",pos:"noun"},
+  {pa:"frukotendo",en:"fruit store",pos:"noun",note:"fruko + tendo"},
+  {pa:"fu",en:"(future tense marker) / next",pos:"particle"},
+  {pa:"fula",en:"full",pos:"adj"},
+  {pa:"fuli",en:"fill",pos:"verb"},
+  {pa:"fumo",en:"smoke",pos:"noun"},
+  {pa:"fumi",en:"smoke",pos:"verb"},
+  {pa:"fuyo",en:"tomorrow",pos:"noun"},
+  {pa:"galo",en:"chicken",pos:"noun"},
+  {pa:"gambo",en:"leg",pos:"noun"},
+  {pa:"garfo",en:"fork",pos:"noun"},
+  {pa:"gardi",en:"keep / hold",pos:"verb"},
+  {pa:"gato",en:"cat",pos:"noun"},
+  {pa:"goro",en:"hat",pos:"noun"},
+  {pa:"granda",en:"big",pos:"adj"},
+  {pa:"grata",en:"thankful",pos:"adj"},
+  {pa:"grati",en:"please / thank you / you're welcome",pos:"verb"},
+  {pa:"grato",en:"thanks",pos:"noun"},
+  {pa:"grava",en:"important",pos:"adj"},
+  {pa:"grisa",en:"gray",pos:"adj"},
+  {pa:"gusti",en:"taste",pos:"verb"},
+  {pa:"gusto",en:"flavor",pos:"noun"},
+  {pa:"hapo",en:"occurrence",pos:"noun"},
+  {pa:"haro",en:"hair",pos:"noun"},
+  {pa:"havi",en:"have",pos:"verb"},
+  {pa:"hema",en:"bloody",pos:"adj"},
+  {pa:"hemi",en:"bleed",pos:"verb"},
+  {pa:"hemo",en:"blood",pos:"noun"},
+  {pa:"hemopuri",en:"dialyze",pos:"verb",note:"hemo + puri"},
+  {pa:"hemopuro",en:"hemodialysis",pos:"noun",note:"hemo + puro"},
+  {pa:"helpa",en:"helpful",pos:"adj"},
+  {pa:"helpi",en:"help",pos:"verb"},
+  {pa:"helpio",en:"helper",pos:"noun"},
+  {pa:"helpo",en:"help",pos:"noun"},
+  {pa:"hivero",en:"winter",pos:"noun"},
+  {pa:"hospito",en:"hospital",pos:"noun"},
+  {pa:"huma",en:"human",pos:"adj"},
+  {pa:"humo",en:"person / human",pos:"noun"},
+  {pa:"i",en:"and",pos:"conj"},
+  {pa:"ideo",en:"idea",pos:"noun"},
+  {pa:"ili",en:"or",pos:"conj"},
+  {pa:"insekto",en:"insect",pos:"noun"},
+  {pa:"inter",en:"between",pos:"prep"},
+  {pa:"intera",en:"until",pos:"conj"},
+  {pa:"interligo",en:"internet",pos:"noun",note:"inter + ligo"},
+  {pa:"iri",en:"go",pos:"verb"},
+  {pa:"kafo",en:"coffee",pos:"noun"},
+  {pa:"kambi",en:"change",pos:"verb"},
+  {pa:"kamo",en:"bed",pos:"noun"},
+  {pa:"kamelo",en:"camel",pos:"noun"},
+  {pa:"kanto",en:"song",pos:"noun"},
+  {pa:"kanti",en:"sing",pos:"verb"},
+  {pa:"kantio",en:"singer",pos:"noun"},
+  {pa:"kapi",en:"understand",pos:"verb"},
+  {pa:"kapo",en:"understanding",pos:"noun"},
+  {pa:"kapro",en:"goat",pos:"noun"},
+  {pa:"kargi",en:"carry",pos:"verb"},
+  {pa:"kargi am",en:"bring",pos:"verb"},
+  {pa:"kari",en:"drive",pos:"verb"},
+  {pa:"kario",en:"driver",pos:"noun"},
+  {pa:"karno",en:"meat",pos:"noun"},
+  {pa:"karnotendo",en:"meat store",pos:"noun",note:"karno + tendo"},
+  {pa:"karo",en:"car",pos:"noun"},
+  {pa:"karto",en:"card",pos:"noun"},
+  {pa:"kasi",en:"reside / live",pos:"verb"},
+  {pa:"kaso",en:"house",pos:"noun"},
+  {pa:"kavalo",en:"horse",pos:"noun"},
+  {pa:"ke",en:"that (conjunction) / who, which (relative pronoun)",pos:"conj"},
+  {pa:"ki",en:"question particle (yes/no)",pos:"particle"},
+  {pa:"kido",en:"child",pos:"noun"},
+  {pa:"kiki",en:"kick",pos:"verb"},
+  {pa:"kiko",en:"foot",pos:"noun"},
+  {pa:"kila",en:"thousand",pos:"num"},
+  {pa:"kina",en:"five",pos:"num"},
+  {pa:"kinaluno",en:"May",pos:"noun"},
+  {pa:"kinayo",en:"Thursday",pos:"noun"},
+  {pa:"kiri",en:"get / acquire",pos:"verb"},
+  {pa:"klara",en:"clear / clearly",pos:"adj"},
+  {pa:"klavi",en:"lock",pos:"verb"},
+  {pa:"klavo",en:"key",pos:"noun"},
+  {pa:"kleva",en:"smart",pos:"adj"},
+  {pa:"kolo",en:"neck",pos:"noun"},
+  {pa:"kom",en:"how",pos:"adv"},
+  {pa:"komensi",en:"start",pos:"verb"},
+  {pa:"komenso",en:"start / beginning",pos:"noun"},
+  {pa:"kompo",en:"computer",pos:"noun"},
+  {pa:"kompoludo",en:"videogame",pos:"noun",note:"kompo + ludo"},
+  {pa:"kon",en:"with",pos:"prep"},
+  {pa:"kora",en:"careful / carefully",pos:"adj"},
+  {pa:"kori",en:"care",pos:"verb"},
+  {pa:"koro",en:"heart",pos:"noun"},
+  {pa:"korpo",en:"body",pos:"noun"},
+  {pa:"kredi",en:"believe",pos:"verb"},
+  {pa:"kredio",en:"believer",pos:"noun"},
+  {pa:"krea",en:"creative",pos:"adj"},
+  {pa:"krei",en:"create",pos:"verb"},
+  {pa:"kreo",en:"creation",pos:"noun"},
+  {pa:"krano",en:"head / top",pos:"noun"},
+  {pa:"kroma",en:"color",pos:"adj"},
+  {pa:"kromi",en:"color",pos:"verb"},
+  {pa:"kromo",en:"color",pos:"noun"},
+  {pa:"kuri",en:"run",pos:"verb"},
+  {pa:"kurio",en:"runner",pos:"noun"},
+  {pa:"kumi",en:"stop",pos:"verb"},
+  {pa:"kumo",en:"stop",pos:"noun"},
+  {pa:"kusa",en:"cooked",pos:"adj"},
+  {pa:"kusi",en:"cook",pos:"verb"},
+  {pa:"kuso",en:"kitchen",pos:"noun"},
+  {pa:"kuti",en:"cut",pos:"verb"},
+  {pa:"kuto",en:"knife",pos:"noun"},
+  {pa:"kwa",en:"what",pos:"pronoun"},
+  {pa:"kwant",en:"how many",pos:"adv"},
+  {pa:"kwaraluno",en:"April",pos:"noun"},
+  {pa:"kwarayo",en:"Wednesday",pos:"noun"},
+  {pa:"kwe",en:"where",pos:"adv"},
+  {pa:"kwen",en:"when",pos:"adv"},
+  {pa:"kwi",en:"why",pos:"adv"},
+  {pa:"la",en:"the",pos:"article"},
+  {pa:"la ada",en:"most",pos:"adj"},
+  {pa:"la fu",en:"after",pos:"prep"},
+  {pa:"la mina",en:"least",pos:"adj"},
+  {pa:"la pa",en:"before",pos:"prep"},
+  {pa:"labori",en:"work",pos:"verb"},
+  {pa:"laborio",en:"worker",pos:"noun"},
+  {pa:"laboro",en:"work",pos:"noun"},
+  {pa:"lago",en:"lake",pos:"noun"},
+  {pa:"lagoma",en:"enough",pos:"adj"},
+  {pa:"lakto",en:"milk",pos:"noun"},
+  {pa:"lan",en:"this / these",pos:"dem"},
+  {pa:"lano",en:"sheep",pos:"noun"},
+  {pa:"larga",en:"wide / widely",pos:"adj"},
+  {pa:"largi",en:"widen",pos:"verb"},
+  {pa:"le",en:"he",pos:"pronoun"},
+  {pa:"legi",en:"read",pos:"verb"},
+  {pa:"len",en:"his",pos:"pronoun"},
+  {pa:"lerni",en:"learn",pos:"verb"},
+  {pa:"levo",en:"elevator",pos:"noun"},
+  {pa:"levi",en:"lift",pos:"verb"},
+  {pa:"libera",en:"free",pos:"adj"},
+  {pa:"libero",en:"freedom",pos:"noun"},
+  {pa:"liberi",en:"liberate / free",pos:"verb"},
+  {pa:"libo",en:"book",pos:"noun"},
+  {pa:"libotendo",en:"bookstore",pos:"noun",note:"libo + tendo"},
+  {pa:"ligi",en:"connect",pos:"verb"},
+  {pa:"ligo",en:"bridge / connection",pos:"noun"},
+  {pa:"lingi",en:"lick",pos:"verb"},
+  {pa:"lingo",en:"tongue",pos:"noun"},
+  {pa:"lista",en:"ready",pos:"adj"},
+  {pa:"listi",en:"get ready",pos:"verb"},
+  {pa:"lo",en:"he / she / it",pos:"pronoun"},
+  {pa:"lon",en:"his / her / its",pos:"pronoun"},
+  {pa:"longa",en:"long",pos:"adj"},
+  {pa:"longi",en:"stretch",pos:"verb"},
+  {pa:"los",en:"they / them",pos:"pronoun"},
+  {pa:"losin",en:"their / theirs",pos:"pronoun"},
+  {pa:"lu",en:"she",pos:"pronoun"},
+  {pa:"lun",en:"her",pos:"pronoun"},
+  {pa:"luda",en:"fun",pos:"adj"},
+  {pa:"ludi",en:"play",pos:"verb"},
+  {pa:"ludo",en:"game",pos:"noun"},
+  {pa:"luma",en:"light / bright / shiny",pos:"adj"},
+  {pa:"lumi",en:"shine",pos:"verb"},
+  {pa:"luno",en:"moon / month",pos:"noun"},
+  {pa:"ma",en:"but / although",pos:"conj"},
+  {pa:"maki",en:"make",pos:"verb"},
+  {pa:"mala",en:"bad / wrong / incorrect",pos:"adj"},
+  {pa:"malabra",en:"closed",pos:"adj"},
+  {pa:"malabri",en:"close",pos:"verb"},
+  {pa:"malagwa",en:"dry",pos:"adj"},
+  {pa:"malagwi",en:"dry",pos:"verb"},
+  {pa:"malamabla",en:"cruel / cruelly",pos:"adj"},
+  {pa:"malami",en:"hate",pos:"verb"},
+  {pa:"malbela",en:"ugly",pos:"adj"},
+  {pa:"malbravi",en:"fear",pos:"verb"},
+  {pa:"malbravo",en:"fear",pos:"noun"},
+  {pa:"maldena",en:"poor",pos:"adj"},
+  {pa:"maldeni",en:"steal",pos:"verb"},
+  {pa:"maldilemi",en:"forgive",pos:"verb"},
+  {pa:"maldipa",en:"shallow",pos:"adj"},
+  {pa:"maldoni",en:"take",pos:"verb"},
+  {pa:"maldura",en:"soft",pos:"adj"},
+  {pa:"malen",en:"out",pos:"adv"},
+  {pa:"malevi",en:"drop",pos:"verb"},
+  {pa:"malfasa",en:"behind",pos:"adj"},
+  {pa:"malfasi",en:"face away / turn around",pos:"verb"},
+  {pa:"malfasila",en:"difficult / hard",pos:"adj"},
+  {pa:"malfelisa",en:"sad",pos:"adj"},
+  {pa:"malfeliso",en:"sadness",pos:"noun"},
+  {pa:"malfiki",en:"break",pos:"verb"},
+  {pa:"malfilo",en:"enemy",pos:"noun"},
+  {pa:"malfriga",en:"hot",pos:"adj"},
+  {pa:"malfrigi",en:"heat",pos:"verb"},
+  {pa:"malfrigo",en:"heat",pos:"noun"},
+  {pa:"malfruko",en:"vegetable",pos:"noun"},
+  {pa:"malfula",en:"empty",pos:"adj"},
+  {pa:"malfuli",en:"empty",pos:"verb"},
+  {pa:"malgardi",en:"release / let go",pos:"verb"},
+  {pa:"malgranda",en:"small",pos:"adj"},
+  {pa:"malhelpa",en:"unhelpful",pos:"adj"},
+  {pa:"malkapi",en:"misunderstand",pos:"verb"},
+  {pa:"malkapo",en:"misunderstanding",pos:"noun"},
+  {pa:"malkiri",en:"give away",pos:"verb"},
+  {pa:"malkora",en:"careless / carelessly",pos:"adj"},
+  {pa:"malkori",en:"disregard / ignore",pos:"verb"},
+  {pa:"malkrei",en:"destroy",pos:"verb"},
+  {pa:"malkreo",en:"destruction",pos:"noun"},
+  {pa:"malkrano",en:"bottom",pos:"noun"},
+  {pa:"malmanga",en:"few",pos:"adj"},
+  {pa:"malmiga",en:"left (direction)",pos:"adj"},
+  {pa:"malnebo",en:"storm",pos:"noun"},
+  {pa:"malnuva",en:"old",pos:"adj"},
+  {pa:"malofta",en:"rare / rarely",pos:"adj"},
+  {pa:"malongi",en:"squish",pos:"verb"},
+  {pa:"malpaso",en:"war",pos:"noun"},
+  {pa:"malpova",en:"impossible",pos:"adj"},
+  {pa:"malprenti",en:"lose (opposite of win)",pos:"verb"},
+  {pa:"malprento",en:"loss",pos:"noun"},
+  {pa:"malprentio",en:"loser",pos:"noun"},
+  {pa:"malpresi",en:"pull",pos:"verb"},
+  {pa:"malpura",en:"dirty",pos:"adj"},
+  {pa:"malpuro",en:"dirt",pos:"noun"},
+  {pa:"malrapida",en:"slow / slowly",pos:"adj"},
+  {pa:"malrapidi",en:"slow down",pos:"verb"},
+  {pa:"malsama",en:"different",pos:"adj"},
+  {pa:"malsana",en:"ill / sick",pos:"adj"},
+  {pa:"malsano",en:"illness",pos:"noun"},
+  {pa:"malsendi",en:"receive",pos:"verb"},
+  {pa:"maltagi",en:"turn off",pos:"verb"},
+  {pa:"maltrova",en:"lost",pos:"adj"},
+  {pa:"maltrovi",en:"lose (opposite of find)",pos:"verb"},
+  {pa:"maltranka",en:"chaotic / chaotically",pos:"adj"},
+  {pa:"maltranko",en:"chaos",pos:"noun"},
+  {pa:"maludi",en:"fight",pos:"verb"},
+  {pa:"maludio",en:"fighter",pos:"noun"},
+  {pa:"maludo",en:"fight",pos:"noun"},
+  {pa:"maluma",en:"dark",pos:"adj"},
+  {pa:"malumi",en:"darken",pos:"verb"},
+  {pa:"malumo",en:"darkness",pos:"noun"},
+  {pa:"malveni",en:"leave",pos:"verb"},
+  {pa:"malvera",en:"false",pos:"adj"},
+  {pa:"malveri",en:"lie",pos:"verb"},
+  {pa:"malvero",en:"lie",pos:"noun"},
+  {pa:"malvida",en:"hidden",pos:"adj"},
+  {pa:"malvidi",en:"hide",pos:"verb"},
+  {pa:"malyusto",en:"revenge",pos:"noun"},
+  {pa:"manga",en:"many",pos:"adj"},
+  {pa:"mani",en:"punch",pos:"verb"},
+  {pa:"mano",en:"hand",pos:"noun"},
+  {pa:"mapo",en:"map",pos:"noun"},
+  {pa:"maro",en:"sea",pos:"noun"},
+  {pa:"marsi",en:"walk",pos:"verb"},
+  {pa:"marsimoro",en:"zombie",pos:"noun",note:"marsi + moro"},
+  {pa:"marso",en:"step",pos:"noun"},
+  {pa:"marsos",en:"stairs",pos:"noun"},
+  {pa:"matina",en:"morning",pos:"adj"},
+  {pa:"matino",en:"morning",pos:"noun"},
+  {pa:"matro",en:"mother",pos:"noun"},
+  {pa:"matura",en:"mature",pos:"adj"},
+  {pa:"me",en:"I / me",pos:"pronoun"},
+  {pa:"mediko",en:"medicine",pos:"noun"},
+  {pa:"men",en:"my / mine",pos:"pronoun"},
+  {pa:"merko",en:"market",pos:"noun"},
+  {pa:"mesagi",en:"text / message",pos:"verb"},
+  {pa:"mesago",en:"text / message",pos:"noun"},
+  {pa:"miga",en:"right (direction)",pos:"adj"},
+  {pa:"mina",en:"less",pos:"adj"},
+  {pa:"mora",en:"dead",pos:"adj"},
+  {pa:"morahumo",en:"ghost",pos:"noun",note:"mora + humo"},
+  {pa:"mori",en:"die",pos:"verb"},
+  {pa:"moro",en:"death",pos:"noun"},
+  {pa:"moto",en:"motorcycle",pos:"noun"},
+  {pa:"moti",en:"ride a motorcycle",pos:"verb"},
+  {pa:"motio",en:"motorcycle rider",pos:"noun"},
+  {pa:"movi",en:"move",pos:"verb"},
+  {pa:"mondo",en:"world",pos:"noun"},
+  {pa:"monto",en:"mountain",pos:"noun"},
+  {pa:"muro",en:"wall",pos:"noun"},
+  {pa:"musiko",en:"music",pos:"noun"},
+  {pa:"musko",en:"fly (insect)",pos:"noun"},
+  {pa:"na",en:"no / not",pos:"particle"},
+  {pa:"nadi",en:"swim",pos:"verb"},
+  {pa:"nadio",en:"swimmer",pos:"noun"},
+  {pa:"naski",en:"be born",pos:"verb"},
+  {pa:"nasi",en:"smell",pos:"verb"},
+  {pa:"naso",en:"nose",pos:"noun"},
+  {pa:"nasumeso",en:"nothing",pos:"noun"},
+  {pa:"nebo",en:"sky",pos:"noun"},
+  {pa:"nebofelo",en:"weather",pos:"noun",note:"nebo + felo"},
+  {pa:"nedi",en:"need",pos:"verb"},
+  {pa:"nedo",en:"need",pos:"noun"},
+  {pa:"negra",en:"black",pos:"adj"},
+  {pa:"nerva",en:"nervous / nervously",pos:"adj"},
+  {pa:"nervo",en:"nerve",pos:"noun"},
+  {pa:"nomi",en:"name",pos:"verb"},
+  {pa:"nomo",en:"name",pos:"noun"},
+  {pa:"nos",en:"we / us",pos:"pronoun"},
+  {pa:"nos ke",en:"let's",pos:"phrase"},
+  {pa:"nosin",en:"our / ours",pos:"pronoun"},
+  {pa:"nova",en:"nine",pos:"num"},
+  {pa:"novaluno",en:"September",pos:"noun"},
+  {pa:"nufemo",en:"girl",pos:"noun"},
+  {pa:"nuro",en:"brain",pos:"noun"},
+  {pa:"nursio",en:"nurse",pos:"noun"},
+  {pa:"nutri",en:"eat",pos:"verb"},
+  {pa:"nutro",en:"food",pos:"noun"},
+  {pa:"numi",en:"count",pos:"verb"},
+  {pa:"numo",en:"number",pos:"noun"},
+  {pa:"nuna",en:"now",pos:"adv"},
+  {pa:"nuva",en:"new",pos:"adj"},
+  {pa:"odoro",en:"smell / scent",pos:"noun"},
+  {pa:"ofiso",en:"office",pos:"noun"},
+  {pa:"ofta",en:"often",pos:"adv"},
+  {pa:"oktaluno",en:"August",pos:"noun"},
+  {pa:"okli",en:"look / watch",pos:"verb"},
+  {pa:"oklo",en:"eye",pos:"noun"},
+  {pa:"oleo",en:"oil",pos:"noun"},
+  {pa:"onesta",en:"honest",pos:"adj"},
+  {pa:"onesto",en:"honesty",pos:"noun"},
+  {pa:"orana",en:"orange",pos:"adj"},
+  {pa:"oreli",en:"hear",pos:"verb"},
+  {pa:"orelo",en:"ear",pos:"noun"},
+  {pa:"orido",en:"minute",pos:"noun",note:"oro + -ido"},
+  {pa:"oridido",en:"second",pos:"noun",note:"orido + -ido"},
+  {pa:"orlo",en:"clock",pos:"noun"},
+  {pa:"oro",en:"hour / time",pos:"noun"},
+  {pa:"otra",en:"other",pos:"adj"},
+  {pa:"otra hapa",en:"again",pos:"adv"},
+  {pa:"otro",en:"other",pos:"noun"},
+  {pa:"ovo",en:"egg",pos:"noun"},
+  {pa:"oyo",en:"today",pos:"noun"},
+  {pa:"pa",en:"(past tense marker)",pos:"particle"},
+  {pa:"paki",en:"pack",pos:"verb"},
+  {pa:"pako",en:"package",pos:"noun"},
+  {pa:"pano",en:"bread",pos:"noun"},
+  {pa:"panotendo",en:"bakery",pos:"noun",note:"pano + tendo"},
+  {pa:"papelo",en:"paper",pos:"noun"},
+  {pa:"parko",en:"park",pos:"noun"},
+  {pa:"parli",en:"speak",pos:"verb"},
+  {pa:"parlo",en:"word / sentence",pos:"noun"},
+  {pa:"pasa",en:"peaceful / peacefully",pos:"adj"},
+  {pa:"paso",en:"peace",pos:"noun"},
+  {pa:"patro",en:"father",pos:"noun"},
+  {pa:"pawa",en:"electric",pos:"adj"},
+  {pa:"pawo",en:"electricity / energy",pos:"noun"},
+  {pa:"payo",en:"yesterday",pos:"noun"},
+  {pa:"pelo",en:"skin",pos:"noun"},
+  {pa:"pensi",en:"think",pos:"verb"},
+  {pa:"penso",en:"thought",pos:"noun"},
+  {pa:"periga",en:"dangerous / dangerously",pos:"adj"},
+  {pa:"perigi",en:"endanger",pos:"verb"},
+  {pa:"perigo",en:"danger",pos:"noun"},
+  {pa:"permi",en:"allow / permit / let",pos:"verb"},
+  {pa:"pinto",en:"paint",pos:"noun"},
+  {pa:"pinti",en:"paint",pos:"verb"},
+  {pa:"pintio",en:"painter",pos:"noun"},
+  {pa:"pipo",en:"dog",pos:"noun"},
+  {pa:"pipido",en:"puppy",pos:"noun",note:"pipo + -ido"},
+  {pa:"piski",en:"fish",pos:"verb"},
+  {pa:"piskio",en:"fisherman",pos:"noun"},
+  {pa:"pisko",en:"fish",pos:"noun"},
+  {pa:"piso",en:"floor",pos:"noun"},
+  {pa:"plasta",en:"plastic",pos:"adj"},
+  {pa:"plasto",en:"plastic",pos:"noun"},
+  {pa:"plato",en:"plate",pos:"noun"},
+  {pa:"playo",en:"beach",pos:"noun"},
+  {pa:"plori",en:"cry",pos:"verb"},
+  {pa:"ploro",en:"tear",pos:"noun"},
+  {pa:"plumi",en:"write",pos:"verb"},
+  {pa:"plumio",en:"writer",pos:"noun"},
+  {pa:"plumo",en:"pen",pos:"noun"},
+  {pa:"pluvi",en:"raining",pos:"verb"},
+  {pa:"pluvo",en:"rain",pos:"noun"},
+  {pa:"pordo",en:"pig",pos:"noun"},
+  {pa:"porto",en:"door",pos:"noun"},
+  {pa:"posti",en:"mail",pos:"verb"},
+  {pa:"posto",en:"mail",pos:"noun"},
+  {pa:"pova",en:"possible / possibly / maybe / might",pos:"adj"},
+  {pa:"povi",en:"can",pos:"verb"},
+  {pa:"povo",en:"possibility",pos:"noun"},
+  {pa:"preferi",en:"prefer",pos:"verb"},
+  {pa:"prenti",en:"win",pos:"verb"},
+  {pa:"prentio",en:"winner",pos:"noun"},
+  {pa:"prento",en:"win",pos:"noun"},
+  {pa:"presi",en:"push / press",pos:"verb"},
+  {pa:"preska",en:"almost",pos:"adv"},
+  {pa:"printemo",en:"spring",pos:"noun"},
+  {pa:"propi",en:"own",pos:"verb"},
+  {pa:"propi kon",en:"belong",pos:"verb"},
+  {pa:"propo",en:"property",pos:"noun"},
+  {pa:"proti",en:"cover / protect",pos:"verb"},
+  {pa:"proto",en:"cover / lid",pos:"noun"},
+  {pa:"puli",en:"jump",pos:"verb"},
+  {pa:"pulmi",en:"breathe",pos:"verb"},
+  {pa:"pulmo",en:"lung",pos:"noun"},
+  {pa:"pura",en:"clean",pos:"adj"},
+  {pa:"puri",en:"clean",pos:"verb"},
+  {pa:"purio",en:"cleaner",pos:"noun"},
+  {pa:"purpa",en:"purple",pos:"adj"},
+  {pa:"kwara",en:"four",pos:"num"},
+  {pa:"rapida",en:"fast / quickly",pos:"adj"},
+  {pa:"rapidi",en:"speed up",pos:"verb"},
+  {pa:"rebigi",en:"rebuild",pos:"verb",note:"re- + bigi"},
+  {pa:"reda",en:"red",pos:"adj"},
+  {pa:"refari",en:"redo",pos:"verb",note:"re- + fari"},
+  {pa:"refusi",en:"refuse",pos:"verb"},
+  {pa:"refuso",en:"refusal",pos:"noun"},
+  {pa:"rekomensi",en:"restart",pos:"verb",note:"re- + komensi"},
+  {pa:"relegi",en:"reread",pos:"verb",note:"re- + legi"},
+  {pa:"repensi",en:"remember",pos:"verb",note:"re- + pensi"},
+  {pa:"repenso",en:"memory",pos:"noun",note:"re- + penso"},
+  {pa:"replumi",en:"rewrite",pos:"verb",note:"re- + plumi"},
+  {pa:"resti",en:"stay / rest / wait / pause",pos:"verb"},
+  {pa:"rida",en:"funny",pos:"adj"},
+  {pa:"ridi",en:"laugh",pos:"verb"},
+  {pa:"rido",en:"joke",pos:"noun"},
+  {pa:"rivo",en:"river",pos:"noun"},
+  {pa:"roko",en:"rock",pos:"noun"},
+  {pa:"ropo",en:"clothes",pos:"noun"},
+  {pa:"ropi",en:"dress / get dressed",pos:"verb"},
+  {pa:"ropopuro",en:"washing machine",pos:"noun",note:"ropo + puro"},
+  {pa:"sabi",en:"know",pos:"verb"},
+  {pa:"sabo",en:"knowledge",pos:"noun"},
+  {pa:"sako",en:"bag",pos:"noun"},
+  {pa:"salo",en:"salt",pos:"noun"},
+  {pa:"sami",en:"resemble / copy / duplicate",pos:"verb"},
+  {pa:"sama",en:"same",pos:"adj"},
+  {pa:"sana",en:"healthy",pos:"adj"},
+  {pa:"sano",en:"health",pos:"noun"},
+  {pa:"sapo",en:"shoe",pos:"noun"},
+  {pa:"sauro",en:"dinosaur",pos:"noun"},
+  {pa:"sedi",en:"sit",pos:"verb"},
+  {pa:"sedo",en:"chair",pos:"noun"},
+  {pa:"seka",en:"dry",pos:"adj"},
+  {pa:"seki",en:"dry",pos:"verb"},
+  {pa:"sela",en:"frozen",pos:"adj"},
+  {pa:"seli",en:"freeze",pos:"verb"},
+  {pa:"selo",en:"ice",pos:"noun"},
+  {pa:"selido",en:"ice cube",pos:"noun",note:"selo + -ido"},
+  {pa:"semano",en:"week",pos:"noun"},
+  {pa:"sempra",en:"always",pos:"adv"},
+  {pa:"sen",en:"without",pos:"prep"},
+  {pa:"sendi",en:"send",pos:"verb"},
+  {pa:"senta",en:"hundred",pos:"num"},
+  {pa:"sepa",en:"seven",pos:"num"},
+  {pa:"sepaluno",en:"July",pos:"noun"},
+  {pa:"sepayo",en:"Saturday",pos:"noun"},
+  {pa:"serka",en:"next to / near / approximately",pos:"prep"},
+  {pa:"serpo",en:"snake",pos:"noun"},
+  {pa:"sera",en:"zero",pos:"num"},
+  {pa:"sesa",en:"six",pos:"num"},
+  {pa:"sesaluno",en:"June",pos:"noun"},
+  {pa:"sesayo",en:"Friday",pos:"noun"},
+  {pa:"sesono",en:"season",pos:"noun"},
+  {pa:"si",en:"if",pos:"conj"},
+  {pa:"simo",en:"monkey",pos:"noun"},
+  {pa:"sina",en:"unless",pos:"conj"},
+  {pa:"skato",en:"box",pos:"noun"},
+  {pa:"skoli",en:"teach",pos:"verb"},
+  {pa:"skolio",en:"teacher",pos:"noun"},
+  {pa:"skolo",en:"school",pos:"noun"},
+  {pa:"skusa",en:"sorry",pos:"adj"},
+  {pa:"skusi",en:"apologize",pos:"verb"},
+  {pa:"skuso",en:"apology",pos:"noun"},
+  {pa:"sofo",en:"sofa",pos:"noun"},
+  {pa:"sola",en:"only / just / alone",pos:"adj"},
+  {pa:"solvi",en:"solve",pos:"verb"},
+  {pa:"solvo",en:"solution",pos:"noun"},
+  {pa:"somero",en:"summer",pos:"noun"},
+  {pa:"somni",en:"dream",pos:"verb"},
+  {pa:"somno",en:"dream",pos:"noun"},
+  {pa:"spero",en:"evening",pos:"noun"},
+  {pa:"sporto",en:"sport",pos:"noun"},
+  {pa:"sporti",en:"play a sport",pos:"verb"},
+  {pa:"sportio",en:"athlete",pos:"noun"},
+  {pa:"spiro",en:"breath",pos:"noun"},
+  {pa:"spiso",en:"spice",pos:"noun"},
+  {pa:"spuno",en:"spoon",pos:"noun"},
+  {pa:"stari",en:"stand",pos:"verb"},
+  {pa:"stelo",en:"star",pos:"noun"},
+  {pa:"strado",en:"street",pos:"noun"},
+  {pa:"studi",en:"study",pos:"verb"},
+  {pa:"studio",en:"student",pos:"noun"},
+  {pa:"sub",en:"under",pos:"prep"},
+  {pa:"sukra",en:"sweet",pos:"adj"},
+  {pa:"sukro",en:"sugar",pos:"noun"},
+  {pa:"suma",en:"some",pos:"adj"},
+  {pa:"sumeso",en:"something",pos:"noun"},
+  {pa:"sumoro",en:"sometime(s)",pos:"adv"},
+  {pa:"suna",en:"sunny",pos:"adj"},
+  {pa:"suno",en:"sun",pos:"noun"},
+  {pa:"sur",en:"on / about",pos:"prep"},
+  {pa:"tabako",en:"tobacco",pos:"noun"},
+  {pa:"tablo",en:"table",pos:"noun"},
+  {pa:"tagi",en:"toggle / turn on",pos:"verb"},
+  {pa:"tago",en:"switch",pos:"noun"},
+  {pa:"tarda",en:"late",pos:"adj"},
+  {pa:"taso",en:"cup",pos:"noun"},
+  {pa:"teko",en:"ceiling",pos:"noun"},
+  {pa:"telo",en:"phone",pos:"noun"},
+  {pa:"tendo",en:"shop / store",pos:"noun"},
+  {pa:"teo",en:"tea",pos:"noun"},
+  {pa:"terfa",en:"grassy",pos:"adj"},
+  {pa:"terfo",en:"grass",pos:"noun"},
+  {pa:"tero",en:"ground",pos:"noun"},
+  {pa:"teramaludi",en:"do jiu jitsu",pos:"verb",note:"tera + maludi"},
+  {pa:"teramaludo",en:"jiu jitsu",pos:"noun",note:"tera + maludo"},
+  {pa:"tivo",en:"television / TV",pos:"noun"},
+  {pa:"toda",en:"all",pos:"adj"},
+  {pa:"todabona",en:"perfect",pos:"adj",note:"toda + bona"},
+  {pa:"todaboni",en:"perfect",pos:"verb",note:"toda + boni"},
+  {pa:"toki",en:"touch",pos:"verb"},
+  {pa:"tolo",en:"towel",pos:"noun"},
+  {pa:"topi",en:"put / place",pos:"verb"},
+  {pa:"topo",en:"place",pos:"noun"},
+  {pa:"tramo",en:"tram / train",pos:"noun"},
+  {pa:"tranka",en:"calm / calmly",pos:"adj"},
+  {pa:"tranki",en:"calm down",pos:"verb"},
+  {pa:"tranko",en:"calmness",pos:"noun"},
+  {pa:"trati",en:"try",pos:"verb"},
+  {pa:"trema",en:"shaky",pos:"adj"},
+  {pa:"tremi",en:"shake",pos:"verb"},
+  {pa:"tria",en:"three",pos:"num"},
+  {pa:"triayo",en:"Tuesday",pos:"noun"},
+  {pa:"trialuno",en:"March",pos:"noun"},
+  {pa:"tro",en:"too much",pos:"adv"},
+  {pa:"trovi",en:"find",pos:"verb"},
+  {pa:"tru",en:"through",pos:"prep"},
+  {pa:"una",en:"one",pos:"num"},
+  {pa:"una hapo",en:"once",pos:"adv"},
+  {pa:"unaluno",en:"January",pos:"noun"},
+  {pa:"unayo",en:"Sunday",pos:"noun"},
+  {pa:"urbo",en:"city",pos:"noun"},
+  {pa:"vapo",en:"ship",pos:"noun"},
+  {pa:"vaso",en:"container",pos:"noun"},
+  {pa:"venaro",en:"wind",pos:"noun"},
+  {pa:"vendi",en:"sell",pos:"verb"},
+  {pa:"veni",en:"come / arrive",pos:"verb"},
+  {pa:"vera",en:"true / truly / real / really",pos:"adj"},
+  {pa:"vero",en:"truth",pos:"noun"},
+  {pa:"verda",en:"green",pos:"adj"},
+  {pa:"vidi",en:"see",pos:"verb"},
+  {pa:"vilo",en:"village",pos:"noun"},
+  {pa:"viro",en:"man",pos:"noun"},
+  {pa:"viva",en:"alive",pos:"adj"},
+  {pa:"vivi",en:"live",pos:"verb"},
+  {pa:"vivo",en:"life",pos:"noun"},
+  {pa:"voli",en:"want",pos:"verb"},
+  {pa:"volvi",en:"return / put back",pos:"verb"},
+  {pa:"wadi",en:"promise",pos:"verb"},
+  {pa:"wado",en:"promise",pos:"noun"},
+  {pa:"walda",en:"wooden",pos:"adj"},
+  {pa:"waldo",en:"wood",pos:"noun"},
+  {pa:"waka",en:"awake",pos:"adj"},
+  {pa:"waki",en:"wake",pos:"verb"},
+  {pa:"waso",en:"bird",pos:"noun"},
+  {pa:"wundido",en:"small cut / scrape",pos:"noun",note:"wundo + -ido"},
+  {pa:"wundo",en:"wound",pos:"noun"},
+  {pa:"ya",en:"already",pos:"adv"},
+  {pa:"yela",en:"yellow",pos:"adj"},
+  {pa:"yo",en:"day",pos:"noun"},
+  {pa:"yoyo",en:"sister",pos:"noun"},
+  {pa:"yu",en:"you (singular)",pos:"pronoun"},
+  {pa:"yun",en:"your / yours (singular)",pos:"pronoun"},
+  {pa:"yus",en:"you (plural)",pos:"pronoun"},
+  {pa:"yusin",en:"your / yours (plural)",pos:"pronoun"},
+  {pa:"kwara",en:"four",pos:"num"},
+  {pa:"okta",en:"eight",pos:"num"},
+  {pa:"nokto",en:"night",pos:"noun"},
+  {pa:"far",en:"far",pos:"adv"},
+  {pa:"a",en:"to / at",pos:"prep"},
+  {pa:"esi vidi ke",en:"seem (is seen as)",pos:"phrase"},
+];
+
+// Deduplicate by pa word
+const seen = new Set();
+const DICTIONARY = DICT.filter(entry => {
+  if (seen.has(entry.pa)) return false;
+  seen.add(entry.pa);
+  return true;
+}).sort((a, b) => a.pa.localeCompare(b.pa));
+
+// ═══════════════════════════════════════════════════════════════
+// SEARCH FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function searchEnToPA(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+  
+  const exact = [];
+  const startsWith = [];
+  const contains = [];
+  
+  DICTIONARY.forEach(entry => {
+    const meanings = entry.en.toLowerCase().split(/\s*\/\s*|\s*\(\s*|\s*\)\s*/).filter(Boolean);
+    const enLower = entry.en.toLowerCase();
+    
+    // Exact match on any meaning
+    if (meanings.some(m => m.trim() === q)) {
+      exact.push(entry);
+    }
+    // Starts with query
+    else if (meanings.some(m => m.trim().startsWith(q)) || enLower.startsWith(q)) {
+      startsWith.push(entry);
+    }
+    // Contains query
+    else if (enLower.includes(q)) {
+      contains.push(entry);
+    }
+  });
+  
+  return [...exact, ...startsWith, ...contains];
+}
+
+function searchPAToEn(query) {
+  const q = query.toLowerCase().trim();
+  if (!q) return [];
+  
+  const exact = [];
+  const startsWith = [];
+  const contains = [];
+  
+  DICTIONARY.forEach(entry => {
+    const paLower = entry.pa.toLowerCase();
+    
+    if (paLower === q) {
+      exact.push(entry);
+    } else if (paLower.startsWith(q)) {
+      startsWith.push(entry);
+    } else if (paLower.includes(q)) {
+      contains.push(entry);
+    }
+  });
+  
+  return [...exact, ...startsWith, ...contains];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+const appEl = document.getElementById("app");
+
+let enQuery = "";
+let paQuery = "";
+let browseLetter = "";
+
+function renderResultItem(entry, direction) {
+  const word = direction === "en" ? entry.pa : entry.en;
+  const trans = direction === "en" ? entry.en : entry.pa;
+  const arrow = direction === "en" ? "→" : "←";
+  
+  let noteHTML = "";
+  if (entry.note) {
+    noteHTML = `<div class="result-note">🧩 ${entry.note}</div>`;
+  }
+  
+  return `<div class="result-item">
+    <span class="result-arrow">${arrow}</span>
+    <div style="flex:1;min-width:0">
+      <div class="result-word">${word}</div>
+      <div class="result-translation">${trans}</div>
+      <span class="result-pos">${entry.pos}</span>
+      ${noteHTML}
+    </div>
+  </div>`;
+}
+
+function render() {
+  const enResults = searchEnToPA(enQuery);
+  const paResults = searchPAToEn(paQuery);
+  
+  let enResultsHTML = "";
+  if (enQuery.trim()) {
+    if (enResults.length > 0) {
+      enResultsHTML = `<div class="result-count">${enResults.length} result${enResults.length !== 1 ? "s" : ""}</div>`;
+      enResultsHTML += enResults.slice(0, 30).map(e => renderResultItem(e, "en")).join("");
+      if (enResults.length > 30) enResultsHTML += `<div class="result-count" style="text-align:center;padding:12px">...and ${enResults.length - 30} more</div>`;
+    } else {
+      enResultsHTML = `<div class="no-results"><div class="no-results-icon">🤔</div>No results for "${enQuery}"</div>`;
+    }
+  }
+  
+  let paResultsHTML = "";
+  if (paQuery.trim()) {
+    if (paResults.length > 0) {
+      paResultsHTML = `<div class="result-count">${paResults.length} result${paResults.length !== 1 ? "s" : ""}</div>`;
+      paResultsHTML += paResults.slice(0, 30).map(e => renderResultItem(e, "pa")).join("");
+      if (paResults.length > 30) paResultsHTML += `<div class="result-count" style="text-align:center;padding:12px">...and ${paResults.length - 30} more</div>`;
+    } else {
+      paResultsHTML = `<div class="no-results"><div class="no-results-icon">🤔</div>No results for "${paQuery}"</div>`;
+    }
+  }
+  
+  // Browse by letter
+  const letters = "ABDEFGHIKLMNOPRSTUVWY".split("");
+  const paLetters = new Set(DICTIONARY.map(e => e.pa[0].toUpperCase()));
+  
+  let browseHTML = "";
+  if (browseLetter) {
+    const browseResults = DICTIONARY.filter(e => e.pa[0].toUpperCase() === browseLetter);
+    browseHTML = `<div class="browse-results">${browseResults.map(e => renderResultItem(e, "pa")).join("")}</div>`;
+  }
+  
+  const grammarTips = [
+    { title: "Nouns end in -o", text: "All nouns end in <strong>-o</strong>. Plurals add <strong>-s</strong>: libo → libos (books)" },
+    { title: "Verbs end in -i", text: "Infinitive/present tense ends in <strong>-i</strong>. Past: <strong>pa</strong> + verb. Future: <strong>fu</strong> + verb." },
+    { title: "Adjectives end in -a", text: "Both adjectives and adverbs end in <strong>-a</strong>. Adjectives precede nouns: bela kaso (beautiful house)" },
+    { title: "mal- = opposite", text: "Add <strong>mal-</strong> to create opposites: bela (beautiful) → malbela (ugly), veni (come) → malveni (leave)" },
+    { title: "re- = again", text: "Add <strong>re-</strong> to verbs for repetition: legi (read) → relegi (reread), pensi (think) → repensi (remember)" },
+    { title: "-ido = smaller version", text: "The suffix <strong>-ido</strong> makes diminutives: pipo (dog) → pipido (puppy), fogo (fire) → fogido (flame)" },
+    { title: "-io = doer/agent", text: "The suffix <strong>-io</strong> creates agent nouns: kanti (sing) → kantio (singer), labori (work) → laborio (worker)" },
+    { title: "Compound words", text: "Combine words to make new ones: pano (bread) + tendo (store) = <strong>panotendo</strong> (bakery)" },
+  ];
+  const tip = grammarTips[Math.floor(Date.now() / 60000) % grammarTips.length];
+  
+  appEl.innerHTML = `
+    <div class="stats-bar">
+      <span class="stat-chip">📖 ${DICTIONARY.length} words</span>
+      <span class="stat-chip blue">🔤 Bidirectional</span>
+      <span class="stat-chip green">⚡ Instant search</span>
+    </div>
+    
+    <!-- English → Parli Aspo -->
+    <div class="panel">
+      <div class="panel-label">
+        <div class="panel-flag flag-en">EN</div>
+        <span class="panel-lang">English → Parli Aspo</span>
+      </div>
+      <div class="input-wrap">
+        <input class="search-input" id="enInput" type="text" placeholder="Type an English word..."
+          value="${enQuery}" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="clear-btn ${enQuery ? 'visible' : ''}" id="enClear">✕</button>
+      </div>
+      <div class="results" id="enResults">${enResultsHTML}</div>
+    </div>
+    
+    <div class="divider">
+      <div class="divider-line"></div>
+      <div class="divider-icon">⇅</div>
+      <div class="divider-line"></div>
+    </div>
+    
+    <!-- Parli Aspo → English -->
+    <div class="panel pa-panel">
+      <div class="panel-label">
+        <div class="panel-flag flag-pa">PA</div>
+        <span class="panel-lang">Parli Aspo → English</span>
+      </div>
+      <div class="input-wrap">
+        <input class="search-input" id="paInput" type="text" placeholder="Topi parlo de Parli Aspo..."
+          value="${paQuery}" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="clear-btn ${paQuery ? 'visible' : ''}" id="paClear">✕</button>
+      </div>
+      <div class="results" id="paResults">${paResultsHTML}</div>
+    </div>
+    
+    <!-- Grammar tip -->
+    <div class="grammar-tip">
+      <div class="grammar-tip-title">💡 ${tip.title}</div>
+      <div class="grammar-tip-text">${tip.text}</div>
+    </div>
+    
+    <!-- Browse -->
+    <div class="browse-section">
+      <div class="browse-title">📚 Browse by letter</div>
+      <div class="letter-nav">
+        ${letters.map(l => {
+          const has = paLetters.has(l);
+          const active = browseLetter === l;
+          return `<button class="letter-btn ${active ? 'active' : ''} ${!has ? 'disabled' : ''}"
+            data-letter="${l}" ${!has ? 'disabled' : ''}>${l}</button>`;
+        }).join("")}
+      </div>
+      ${browseHTML}
+    </div>
+  `;
+  
+  // Bind events
+  const enInput = document.getElementById("enInput");
+  const paInput = document.getElementById("paInput");
+  
+  enInput.addEventListener("input", e => {
+    enQuery = e.target.value;
+    render();
+    // Restore cursor
+    const el = document.getElementById("enInput");
+    el.focus();
+    el.setSelectionRange(e.target.selectionStart, e.target.selectionEnd);
+  });
+  
+  paInput.addEventListener("input", e => {
+    paQuery = e.target.value;
+    render();
+    const el = document.getElementById("paInput");
+    el.focus();
+    el.setSelectionRange(e.target.selectionStart, e.target.selectionEnd);
+  });
+  
+  document.getElementById("enClear").addEventListener("click", () => {
+    enQuery = "";
+    render();
+    document.getElementById("enInput").focus();
+  });
+  
+  document.getElementById("paClear").addEventListener("click", () => {
+    paQuery = "";
+    render();
+    document.getElementById("paInput").focus();
+  });
+  
+  document.querySelectorAll(".letter-btn:not(.disabled)").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const l = btn.dataset.letter;
+      browseLetter = browseLetter === l ? "" : l;
+      render();
+    });
+  });
+}
+
+render();
+</script>
+</body>
+</html>
